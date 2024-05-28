@@ -1,10 +1,16 @@
 import streamlit as st
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
+from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfgen import canvas
 from io import BytesIO
 import datetime
+
+
+def wrap_text(text, width, font_name, font_size):
+    lines = simpleSplit(text, font_name, font_size, width)
+    return lines
 
 
 def create_pdf(employee_name, tasks):
@@ -13,6 +19,8 @@ def create_pdf(employee_name, tasks):
     p = canvas.Canvas(buffer, pagesize=A4)
     p.setFont("HeiseiKakuGo-W5", 12)
     width, height = A4
+    margin = 50
+    text_width = width - 2 * margin
 
     p.drawString(100, height - 40, "引き継ぎ内容")
     y = height - 80
@@ -23,8 +31,13 @@ def create_pdf(employee_name, tasks):
     for i, task in enumerate(tasks):
         p.drawString(100, y, f"発生頻度: {task['frequency']}")
         y -= 20
-        p.drawString(100, y, f"タスク {i + 1}: {task['task']}")
-        y -= 20
+        p.drawString(100, y, f"タスク {i+1}:")
+        task_lines = wrap_text(f"{task['task']}", text_width, "HeiseiKakuGo-W5",12)
+        for line in task_lines:
+            p.drawString(150, y, line)
+            y -= 15
+
+        y -= 5
         p.drawString(100, y, f"期間 {task['start_date']} 〜 {task['end_date']}")
         y -= 30
         p.line(50, y + 5, width - 50, y + 5)
