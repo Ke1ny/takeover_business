@@ -1,2 +1,2 @@
 # takeover_business
-takeover
+業務の引き継ぎをシンプルに共有するためのアプリ
